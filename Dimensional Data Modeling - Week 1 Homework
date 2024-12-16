@@ -1,0 +1,9 @@
+CREATE TYPE films (
+	
+)
+
+CREATE TABLE actors (
+	actor TEXT,
+	actor_id TEXT,
+	
+)
