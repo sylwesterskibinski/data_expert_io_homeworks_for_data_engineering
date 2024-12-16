@@ -1,9 +1,33 @@
-CREATE TYPE films (
-	
-)
+'''CREATE TYPE films AS(
+	film TEXT,
+	votes INTEGER,
+	rating REAL,
+	filmid TEXT
+)'''
 
-CREATE TABLE actors (
+"""CREATE TYPE quality_class AS ENUM ('star','good','average','bad')"""
+
+'''CREATE TABLE actors (
 	actor TEXT,
 	actor_id TEXT,
+	films films,
+	quality_class quality_class,
+	year INTEGER,
+	is_active BOOLEAN
 	
-)
+)'''
+
+'''SELECT MIN(year) FROM actor_films'''
+
+WITH previous AS (
+	SELECT *
+	FROM actors
+	WHERE year = 1970
+),
+	today AS (
+	SELECT *
+	FROM actor_films
+	WHERE year = 1971
+	),
+
+	SELECT 
