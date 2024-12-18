@@ -19,15 +19,56 @@
 
 '''SELECT MIN(year) FROM actor_films'''
 
-WITH previous AS (
+INSERT INTO actors
+WITH yesterday AS (
 	SELECT *
 	FROM actors
-	WHERE year = 1970
+	WHERE year = 1971
 ),
 	today AS (
-	SELECT *
+	SELECT 
+	actor, 
+	actorid,
+	ARRAY_AGG(ROW(
+		film,
+		votes,
+		rating,
+		filmid
+	)::films) AS films,
+	AVG(rating) AS rating,
+	year,
+	CASE WHEN year IS NOT NULL THEN TRUE ELSE FALSE END AS is_active
 	FROM actor_films
-	WHERE year = 1971
-	),
+	WHERE year = 1972
+	GROUP BY 
+	actor, 
+	actorid,
+	year,
+	is_active
+	)
 
 	SELECT 
+	COALESCE(t.actor,y.actor) AS actor,
+	COALESCE(t.actorid,y.actorid) AS actorid,
+	CASE 
+		WHEN y.films IS NULL THEN t.films
+		WHEN y.films IS NOT NULL THEN y.films || t.films
+		ELSE y.films
+	END AS films,
+	CASE 
+        WHEN t.year IS NOT NULL THEN
+            CASE 
+                WHEN t.rating > 8 THEN 'star'
+                WHEN t.rating > 7 THEN 'good'
+                WHEN t.rating > 6 THEN 'average'
+                WHEN t.rating <= 6 THEN 'bad' 
+            ELSE y.quality_class 
+            END
+        ELSE y.quality_class
+    END::quality_class AS quality_class,
+	COALESCE(t.year,y.year+1) AS year,
+	CASE WHEN t.year IS NOT NULL THEN TRUE ELSE FALSE END AS is_active
+
+	FROM today t
+	FULL OUTER JOIN yesterday y
+	ON t.actor = y.actor
